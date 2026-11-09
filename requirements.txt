@@ -1,0 +1,36 @@
+# ==========================================
+# 1. CORE API FRAMEWORK & SERVER
+# Purpose: Handles asynchronous HTTP routing, request parsing, and local ASGI server execution.
+# ==========================================
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+
+# ==========================================
+# 2. DATABASE, ORM & MIGRATIONS
+# Purpose: Manages relational PostgreSQL connections via Psycopg 3, ORM mapping, and schema version control.
+# ==========================================
+sqlalchemy==2.0.36
+psycopg[binary]==3.2.3
+alembic==1.14.0
+
+# ==========================================
+# 3. DATA VALIDATION & SETTINGS
+# Purpose: Enforces strict Pydantic type schemas for API payloads and manages environment configurations safely.
+# ==========================================
+pydantic==2.11.0
+pydantic-settings==2.8.0
+email-validator==2.2.0
+
+# ==========================================
+# 4. AUTHENTICATION, SECURITY & GOOGLE OAUTH
+# Purpose: Handles secure password hashing, JWT tokens, and Google OAuth through Authlib.
+# ==========================================
+bcrypt==4.2.1
+authlib==1.3.2
+python-multipart==0.0.19
+
+# ==========================================
+# 5. ENVIRONMENT UTILITIES
+# Purpose: Loads local secret keys and environment variables from a .env file.
+# ==========================================
+python-dotenv==1.0.1
