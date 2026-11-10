@@ -1,25 +1,24 @@
 import uuid
-from sqlalchemy import Column, String, Text, ForeignKey, DateTime
-from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.sql import func
-from sqlalchemy.orm import relationship
+from typing import Optional, TYPE_CHECKING
+from sqlalchemy import String, Text, ForeignKey
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from backend.database import Base
+from backend.database import UUIDModel, TimestampedModel
 
-class SubjectWorkspace(Base):
+# 2. Import the model conditionally so the type checker sees it, 
+# but circular imports are avoided at runtime.
+if TYPE_CHECKING:
+    from backend.models.user_account_model import User
+    from backend.models.concept_node_model import ConceptNode
+
+class SubjectWorkspace(UUIDModel, TimestampedModel):
     __tablename__ = "subject_workspaces"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
-    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    title: Mapped[str] = mapped_column(String(150), nullable=False)
+    description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    color_tag: Mapped[str] = mapped_column(String(50), default="blue", nullable=False) # For UI workspace badges
     
-    title = Column(String(150), nullable=False)
-    description = Column(Text, nullable=True)
-    color_tag = Column(String(50), default="blue", nullable=False) # For UI workspace badges
-    
-    # Timestamps
-    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
-    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
-
     # Relationships
-    owner = relationship("User", back_populates="workspaces")
-    concept_nodes = relationship("ConceptNode", back_populates="workspace", cascade="all, delete-orphan")
+    owner: Mapped["User"] = relationship("User", back_populates="workspaces")
+    concept_nodes: Mapped[list["ConceptNode"]] = relationship("ConceptNode", back_populates="workspace", cascade="all, delete-orphan")
