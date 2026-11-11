@@ -1,27 +1,29 @@
 import uuid
-from sqlalchemy import Column, String, Text, Float, Boolean, ForeignKey, DateTime
-from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.sql import func
+from typing import Optional, TYPE_CHECKING
+from sqlalchemy import String, Text, Float, Boolean, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from backend.database import Base
+from backend.database import UUIDModel, TimestampedModel
 
-class RetrievalAttempt(Base):
+if TYPE_CHECKING:
+    from backend.models.retrieval_session_model import RetrievalSession
+    from backend.models.concept_node_model import ConceptNode
+    from backend.models.diagnostic_error_log_model import DiagnosticErrorLog
+
+#Defines the RetrievalAttempt model which records the student's specific answer and accuracy score for an individual ConceptNode tested during a retrieval session.
+class RetrievalAttempt(UUIDModel, TimestampedModel):
     __tablename__ = "retrieval_attempts"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
-    session_id = Column(UUID(as_uuid=True), ForeignKey("retrieval_sessions.id", ondelete="CASCADE"), nullable=False, index=True)
-    concept_node_id = Column(UUID(as_uuid=True), ForeignKey("concept_nodes.id", ondelete="CASCADE"), nullable=False, index=True)
-    
-    # Attempt Details
-    user_recall_input = Column(Text, nullable=True) # What the student typed/recalled under masked conditions
-    was_successful = Column(Boolean, default=False, nullable=False)
-    confidence_rating = Column(Float, default=0.0, nullable=False) # Self-reported confidence score
-    
-    # Timestamps
-    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    session_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("retrieval_sessions.id", ondelete="CASCADE"), nullable=False, index=True)
+    concept_node_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("concept_nodes.id", ondelete="CASCADE"), nullable=False, index=True)
 
+    # Attempt Details
+    user_recall_input: Mapped[Optional[str]] = mapped_column(Text, nullable=True) # What the student typed/recalled under masked conditions
+    is_correct: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    confidence_rating: Mapped[float] = mapped_column(Float, default=0.0, nullable=False) # Self-reported confidence score
+    
     # Relationships
-    session = relationship("RetrievalSession", back_populates="attempts")
-    concept_node = relationship("ConceptNode")
-    error_log = relationship("DiagnosticErrorLog", back_populates="attempt", uselist=False, cascade="all, delete-orphan")
+    session: Mapped["RetrievalSession"] = relationship("RetrievalSession", back_populates="attempts")
+    concept_node: Mapped["ConceptNode"] = relationship("ConceptNode")
+    error_log: Mapped[Optional["DiagnosticErrorLog"]] = relationship("DiagnosticErrorLog", back_populates="attempt", uselist=False, cascade="all, delete-orphan")
+    
