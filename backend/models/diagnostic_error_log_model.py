@@ -33,4 +33,4 @@ class DiagnosticErrorLog(UUIDModel, TimestampedModel):
     
     # Relationships
     attempt: Mapped["RetrievalAttempt"] = relationship("RetrievalAttempt", back_populates="error_log")
-    Mapped["ConceptNode"] = relationship("ConceptNode", back_populates="error_logs")
+    concept_node: Mapped["ConceptNode"] = relationship("ConceptNode", back_populates="error_logs", foreign_keys=[concept_node_id])
