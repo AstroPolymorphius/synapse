@@ -11,6 +11,7 @@ from backend.database import UUIDModel, TimestampedModel
 if TYPE_CHECKING:
     from backend.models.subject_workspace_model import SubjectWorkspace
     from backend.models.node_relationship_model import NodeRelationship
+    from backend.models.diagnostic_error_log_model import DiagnosticErrorLog
 class ConceptNode(UUIDModel, TimestampedModel):
     __tablename__ = "concept_nodes"
 
@@ -29,6 +30,7 @@ class ConceptNode(UUIDModel, TimestampedModel):
 
     # Relationships
     workspace: Mapped["SubjectWorkspace"] = relationship("SubjectWorkspace", back_populates="concept_nodes")
+    error_logs: Mapped[list["DiagnosticErrorLog"]] = relationship("DiagnosticErrorLog", back_populates="concept_node", cascade="all, delete-orphan")
     
     # Outgoing and incoming directional relationships to other nodes
     outgoing_links: Mapped[list["NodeRelationship"]] = relationship("NodeRelationship", foreign_keys="[NodeRelationship.source_node_id]", back_populates="source_node", cascade="all, delete-orphan")
