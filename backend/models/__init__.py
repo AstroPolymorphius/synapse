@@ -5,11 +5,13 @@ from backend.models.concept_node_model import ConceptNode
 from backend.models.node_relationship_model import NodeRelationship
 from backend.models.retrieval_session_model import RetrievalSession
 from backend.models.retrieval_attempt_model import RetrievalAttempt
+from backend.models.diagnostic_error_log_model import DiagnosticErrorLog
 
 
 __all__ = [
     "Base",
     "ConceptNode",
+    "DiagnosticErrorLog",
     "NodeRelationship",
     "RetrievalAttempt",
     "RetrievalSession",
