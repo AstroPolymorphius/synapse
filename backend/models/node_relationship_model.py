@@ -1,26 +1,41 @@
 import uuid
-from sqlalchemy import Column, String, ForeignKey, DateTime
-from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.sql import func
-from sqlalchemy.orm import relationship
+from typing import Optional, TYPE_CHECKING
+from sqlalchemy import String, ForeignKey, Enum as SQLEnum
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+import enum
 
-from backend.database import Base
+from backend.database import UUIDModel, TimestampedModel
 
-class NodeRelationship(Base):
+if TYPE_CHECKING:
+    from backend.models.concept_node_model import ConceptNode
+
+#The types of relationships students can make between nodes/concepts/ideas to strengthen their understanding
+class RelationshipType(str, enum.Enum):
+    IS_AN_EXAMPLE_OF = "is an example of"
+    IS_A_PART_OF = "is a part of"
+    CAUSES = "causes"
+    PREVENTS = "prevents"
+    ENABLES = "enables"
+    REGULATES = "regulates"
+    SIMILAR_TO = "similar to"
+    CONTRASTS_WITH = "contrasts with"
+    USED_FOR = "used for"
+    DEPENDS_ON = "depends on"
+    FOLLOWS = "follows"
+    LOCATED = "located"
+
+class NodeRelationship(UUIDModel, TimestampedModel):
     __tablename__ = "node_relationships"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
     
     # Directed edge: source_node -> target_node
-    source_node_id = Column(UUID(as_uuid=True), ForeignKey("concept_nodes.id", ondelete="CASCADE"), nullable=False, index=True)
-    target_node_id = Column(UUID(as_uuid=True), ForeignKey("concept_nodes.id", ondelete="CASCADE"), nullable=False, index=True)
+    source_node_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("concept_nodes.id", ondelete="CASCADE"), nullable=False, index=True)
+    target_node_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("concept_nodes.id", ondelete="CASCADE"), nullable=False, index=True)
     
     # Relationship categorization (e.g., "prerequisite", "causes", "composes", "correlates")
-    relationship_type = Column(String(50), default="prerequisite", nullable=False)
+    relationship_type: Mapped[RelationshipType] = mapped_column(SQLEnum(RelationshipType), default=RelationshipType.DEPENDS_ON, nullable=False)
+    label: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
     
-    # Timestamps
-    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
-
     # Relationships
-    source_node = relationship("ConceptNode", foreign_keys=[source_node_id], back_populates="outgoing_links")
-    target_node = relationship("ConceptNode", foreign_keys=[target_node_id], back_populates="incoming_links")
+    source_node: Mapped["ConceptNode"] = relationship("ConceptNode", foreign_keys=[source_node_id], back_populates="outgoing_links")
+    target_node: Mapped["ConceptNode"] = relationship("ConceptNode", foreign_keys=[target_node_id], back_populates="incoming_links")
