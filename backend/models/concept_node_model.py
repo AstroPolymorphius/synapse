@@ -1,10 +1,17 @@
 import uuid
+import enum
 from typing import TYPE_CHECKING, Optional
-from sqlalchemy import String, Text, Float, ForeignKey
+from sqlalchemy import String, Text, Float, ForeignKey, Enum as SQLEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from backend.database import UUIDModel, TimestampedModel
 
+#A class representing the different categories a current node in one's learning canvas is currently in the learning process
+class NodeStatus(str, enum):
+    UNEXPLORED = "unexplored"
+    ENCODING = "encoding"
+    READY_FOR_RETRIEVAL = "ready for retrieval"
+    MASTERED = "mastered"
 
 # 2. Import the model conditionally so the type checker sees it, 
 # but circular imports are avoided at runtime.
@@ -20,7 +27,7 @@ class ConceptNode(UUIDModel, TimestampedModel):
     # Content & Metadata
     title: Mapped[str] = mapped_column(String(200), nullable=False)
     content: Mapped[Optional[str]] = mapped_column(Text, nullable=True) # Markdown or LaTeX notes explaining the first principle
-    status: Mapped[str] = mapped_column(String(50), default="unexplored", nullable=False) # unexplored, learning, mastered
+    status: Mapped[NodeStatus] = mapped_column(SQLEnum(NodeStatus), default=NodeStatus.UNEXPLORED, nullable=False) # unexplored, encoding, mastered
     mastery_score: Mapped[float] = mapped_column(Float, default=0.0, nullable=False) # 0.0 to 1.0 calculated from retrieval sessions
     
     # Canvas Spatial Coordinates (for persistent drag-and-drop UI positioning)
