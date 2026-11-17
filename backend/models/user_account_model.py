@@ -12,6 +12,7 @@ from backend.database import UUIDModel, TimestampedModel
 # but circular imports are avoided at runtime.
 if TYPE_CHECKING:
     from backend.models.subject_workspace_model import SubjectWorkspace
+    from backend.models.retrieval_session_model import RetrievalSession
 class UserRole(str, enum.Enum):
     STUDENT = "student"
     ADMIN = "admin"
@@ -35,4 +36,5 @@ class User(UUIDModel, TimestampedModel):
     
     
     # Relationships
+    retrieval_sessions: Mapped[list["RetrievalSession"]] = relationship("RetrievalSession", back_populates="user", cascade="all, delete-orphan")
     workspaces: Mapped[list["SubjectWorkspace"]] = relationship("SubjectWorkspace", back_populates="owner", cascade="all, delete-orphan")
