@@ -34,6 +34,7 @@ class NodeRelationship(UUIDModel, TimestampedModel):
     
     # Relationship categorization (e.g., "prerequisite", "causes", "composes", "correlates")
     relationship_type: Mapped[RelationshipType] = mapped_column(SQLEnum(RelationshipType), default=RelationshipType.DEPENDS_ON, nullable=False)
+    label: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
     
     # Relationships
     source_node: Mapped["ConceptNode"] = relationship("ConceptNode", foreign_keys=[source_node_id], back_populates="outgoing_links")
